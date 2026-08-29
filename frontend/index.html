@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="theme-color"
+        content="#070b12"
+    >
+
+    <title>Smart Bus — Travel Smarter</title>
+
+    <link
+        rel="stylesheet"
+        href="./css/style.css"
+    >
+
+</head>
+
+
+<body>
+
+    <!-- HEADER -->
+
+    <header class="top-header">
+
+        <div class="logo">
+            <span class="logo-icon">🚌</span>
+            <span>Smart Bus</span>
+        </div>
+
+        <div class="header-status">
+            <span class="status-dot"></span>
+            System Online
+        </div>
+
+    </header>
+
+
+    <main class="container">
+
+
+        <!-- HERO -->
+
+        <section class="hero">
+
+            <div class="hero-content">
+
+                <p class="eyebrow">
+                    SMART PUBLIC TRANSPORT
+                </p>
+
+                <h1>
+                    Travel smarter.
+                    <br>
+                    Ride better.
+                </h1>
+
+                <p class="hero-description">
+                    Find the best bus, avoid crowded rides,
+                    check arrival times and get smarter
+                    travel recommendations.
+                </p>
+
+
+                <div class="hero-pills">
+
+                    <span>⚡ Smart Routes</span>
+
+                    <span>👥 Crowd Detection</span>
+
+                    <span>🤖 AI Assistance</span>
+
+                </div>
+
+            </div>
+
+
+            <div class="hero-visual">
+
+                <div class="hero-glow"></div>
+
+                <div class="hero-orbit orbit-one"></div>
+
+                <div class="hero-orbit orbit-two"></div>
+
+                <div class="hero-bus">
+                    🚌
+                </div>
+
+                <div class="hero-mini-card">
+
+                    <span>NEXT BUS</span>
+
+                    <strong>LIVE</strong>
+
+                    <small>
+                        Real-time network
+                    </small>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- QUICK STATS -->
+
+        <section class="quick-stats">
+
+            <div class="quick-stat">
+
+                <div class="quick-stat-icon">
+                    🚌
+                </div>
+
+                <div>
+                    <strong>Live Buses</strong>
+                    <span>Real-time status</span>
+                </div>
+
+            </div>
+
+
+            <div class="quick-stat">
+
+                <div class="quick-stat-icon">
+                    ⚡
+                </div>
+
+                <div>
+                    <strong>Smart ETA</strong>
+                    <span>Faster decisions</span>
+                </div>
+
+            </div>
+
+
+            <div class="quick-stat">
+
+                <div class="quick-stat-icon">
+                    👥
+                </div>
+
+                <div>
+                    <strong>Crowd Levels</strong>
+                    <span>Avoid packed buses</span>
+                </div>
+
+            </div>
+
+
+            <div class="quick-stat">
+
+                <div class="quick-stat-icon">
+                    🤖
+                </div>
+
+                <div>
+                    <strong>AI Assistant</strong>
+                    <span>Travel help anytime</span>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ROUTE PLANNER -->
+
+        <section class="search-section">
+
+            <div class="section-heading">
+
+                <div>
+
+                    <span class="section-label">
+                        ROUTE PLANNER
+                    </span>
+
+                    <h2>
+                        Where do you want to go?
+                    </h2>
+
+                    <p class="section-description">
+                        Enter your journey and find the
+                        smartest available bus.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="search-box">
+
+
+                <div class="location-input">
+
+                    <label>FROM</label>
+
+                    <div class="input-wrapper">
+
+                        <span class="input-icon">
+                            📍
+                        </span>
+
+                        <input
+                            type="text"
+                            id="from"
+                            placeholder="Starting point"
+                        >
+
+                        <button
+                            type="button"
+                            id="clearFrom"
+                            class="clear-button"
+                        >
+                            ×
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    id="swapButton"
+                    class="swap-button"
+                    title="Swap locations"
+                >
+                    ⇅
+                </button>
+
+
+                <div class="location-input">
+
+                    <label>TO</label>
+
+                    <div class="input-wrapper">
+
+                        <span class="input-icon">
+                            📍
+                        </span>
+
+                        <input
+                            type="text"
+                            id="to"
+                            placeholder="Destination"
+                        >
+
+                        <button
+                            type="button"
+                            id="clearTo"
+                            class="clear-button"
+                        >
+                            ×
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    id="findRoute"
+                    class="find-route-button"
+                >
+                    Find Best Bus
+                    <span>→</span>
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- SEARCH RESULTS -->
+
+        <section
+            id="results"
+            class="results-section"
+        ></section>
+
+
+        <!-- LIVE BUS DASHBOARD -->
+
+        <section class="dashboard-section">
+
+            <div class="section-heading">
+
+                <div>
+
+                    <span class="section-label">
+                        LIVE NETWORK
+                    </span>
+
+                    <h2>
+                        Live Bus Status
+                    </h2>
+
+                    <p class="section-description">
+                        See what's happening across
+                        the network right now.
+                    </p>
+
+                </div>
+
+
+                <span class="live-indicator">
+
+                    <span class="status-dot"></span>
+
+                    LIVE
+
+                </span>
+
+            </div>
+
+
+            <div
+                id="liveBusGrid"
+                class="live-bus-grid"
+            >
+
+                <div class="status-card">
+
+                    <div class="loading-spinner"></div>
+
+                    <h2>
+                        Loading buses...
+                    </h2>
+
+                    <p>
+                        Getting live bus information.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- AI ASSISTANT -->
+
+        <section class="ai-section">
+
+            <div class="ai-header">
+
+                <div>
+
+                    <span class="section-label">
+                        SMART ASSISTANT
+                    </span>
+
+                    <h2>
+                        Your AI Bus Assistant
+                    </h2>
+
+                    <p>
+                        Ask about buses, routes, ETA,
+                        crowd levels or your expenses.
+                    </p>
+
+                </div>
+
+
+                <div class="ai-icon">
+                    🤖
+                </div>
+
+            </div>
+
+
+            <div
+                id="aiMessages"
+                class="ai-messages"
+            >
+
+                <div class="ai-message ai-bot">
+
+                    <div class="ai-avatar">
+                        🤖
+                    </div>
+
+                    <div class="ai-message-content">
+
+                        <strong>
+                            Smart Bus AI
+                        </strong>
+
+                        <p>
+                            Hi! 👋 I can help you find
+                            the best bus, compare crowd
+                            levels, check ETA and
+                            understand your travel expenses.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="ai-suggestions">
+
+                <button
+                    class="ai-suggestion"
+                    data-question="Which bus has the lowest crowd?"
+                >
+                    👥 Lowest crowd
+                </button>
+
+                <button
+                    class="ai-suggestion"
+                    data-question="Which is the fastest bus?"
+                >
+                    ⚡ Fastest bus
+                </button>
+
+                <button
+                    class="ai-suggestion"
+                    data-question="Recommend the best bus"
+                >
+                    ⭐ Best bus
+                </button>
+
+                <button
+                    class="ai-suggestion"
+                    data-question="How much did I spend on buses?"
+                >
+                    💰 My expenses
+                </button>
+
+            </div>
+
+
+            <div class="ai-input-area">
+
+                <input
+                    type="text"
+                    id="aiQuestion"
+                    placeholder="Ask Smart Bus AI..."
+                >
+
+                <button
+                    type="button"
+                    id="aiSend"
+                    class="ai-send-button"
+                >
+                    ↑
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- EXPENSE DASHBOARD -->
+
+        <section class="dashboard-section">
+
+            <div class="section-heading">
+
+                <div>
+
+                    <span class="section-label">
+                        TRAVEL ANALYTICS
+                    </span>
+
+                    <h2>
+                        Travel Expenses
+                    </h2>
+
+                    <p class="section-description">
+                        Keep track of your bus travel spending.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="expense-grid">
+
+
+                <div class="expense-card">
+
+                    <div class="expense-card-top">
+
+                        <span>THIS WEEK</span>
+
+                        <div class="expense-icon">
+                            📅
+                        </div>
+
+                    </div>
+
+                    <strong id="weeklyExpense">
+                        ₹0
+                    </strong>
+
+                    <small id="weeklyTrips">
+                        0 trips
+                    </small>
+
+                </div>
+
+
+                <div class="expense-card">
+
+                    <div class="expense-card-top">
+
+                        <span>THIS MONTH</span>
+
+                        <div class="expense-icon">
+                            📊
+                        </div>
+
+                    </div>
+
+                    <strong id="monthlyExpense">
+                        ₹0
+                    </strong>
+
+                    <small id="monthlyTrips">
+                        0 trips
+                    </small>
+
+                </div>
+
+
+                <div class="expense-card">
+
+                    <div class="expense-card-top">
+
+                        <span>AVERAGE / TRIP</span>
+
+                        <div class="expense-icon">
+                            💰
+                        </div>
+
+                    </div>
+
+                    <strong id="averageFare">
+                        ₹0
+                    </strong>
+
+                    <small>
+                        Average bus fare
+                    </small>
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
+        <!-- TRAVEL HISTORY -->
+
+        <section class="dashboard-section">
+
+            <div class="section-heading">
+
+                <div>
+
+                    <span class="section-label">
+                        JOURNEY RECORD
+                    </span>
+
+                    <h2>
+                        Travel History
+                    </h2>
+
+                    <p class="section-description">
+                        Your recent bus journeys in one place.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="travelHistory"
+                class="travel-history"
+            >
+
+                <div class="status-card">
+
+                    <div class="loading-spinner"></div>
+
+                    <h2>
+                        Loading history...
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- FOOTER -->
+
+        <footer>
+
+            <div class="footer-brand">
+                🚌 Smart Bus
+            </div>
+
+            <p>
+                Intelligent bus navigation and
+                travel assistance.
+            </p>
+
+            <span>
+                SMARTER ROUTES • BETTER RIDES
+            </span>
+
+        </footer>
+
+
+    </main>
+
+
+    <script src="./js/app.js"></script>
+
+</body>
+
+</html>
