@@ -22,6 +22,12 @@
         href="./css/style.css"
     >
 
+    <!-- LEAFLET MAP -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
 </head>
 
 
@@ -45,6 +51,28 @@
 
 
     <main class="container">
+        <div class="profile-menu">
+    <button class="profile-button" onclick="toggleProfileMenu()">
+        👤 Profile
+    </button>
+
+    <div id="profileDropdown" class="profile-dropdown">
+
+        <div class="profile-info">
+            <strong>Gaurav</strong>
+            <span>Smart Bus User</span>
+        </div>
+
+        <a href="#" onclick="return false;">
+            👤 My Profile
+        </a>
+
+        <a href="/logout">
+            🚪 Logout
+        </a>
+
+    </div>
+</div>
 
 
         <!-- HERO -->
@@ -54,7 +82,7 @@
             <div class="hero-content">
 
                 <p class="eyebrow">
-                    SMART PUBLIC TRANSPORT
+                    SMART BUS PLATFORM
                 </p>
 
                 <h1>
@@ -77,6 +105,8 @@
                     <span>👥 Crowd Detection</span>
 
                     <span>🤖 AI Assistance</span>
+
+                    <span>📍 Live Bus Map</span>
 
                 </div>
 
@@ -161,12 +191,12 @@
             <div class="quick-stat">
 
                 <div class="quick-stat-icon">
-                    🤖
+                    📍
                 </div>
 
                 <div>
-                    <strong>AI Assistant</strong>
-                    <span>Travel help anytime</span>
+                    <strong>Live Map</strong>
+                    <span>Track buses visually</span>
                 </div>
 
             </div>
@@ -291,6 +321,70 @@
             id="results"
             class="results-section"
         ></section>
+
+
+        <!-- =====================================================
+             LIVE BUS MAP
+        ====================================================== -->
+
+        <section class="dashboard-section map-section">
+
+            <div class="section-heading">
+
+                <div>
+
+                    <span class="section-label">
+                        LIVE GPS NETWORK
+                    </span>
+
+                    <h2>
+                        Live Bus Map
+                    </h2>
+
+                    <p class="section-description">
+                        Track Smart Buses using their live
+                        GPS locations.
+                    </p>
+
+                </div>
+
+
+                <div class="map-live-status">
+
+                    <span class="status-dot"></span>
+
+                    LIVE
+
+                </div>
+
+            </div>
+
+
+            <div class="map-wrapper">
+
+                <div id="busMap"></div>
+
+                <div class="map-overlay">
+
+                    <div class="map-overlay-title">
+                        🚌 Smart Bus Network
+                    </div>
+
+                    <div class="map-overlay-text">
+                        Bus locations update automatically.
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="mapBusList"
+                class="map-bus-list"
+            ></div>
+
+        </section>
 
 
         <!-- LIVE BUS DASHBOARD -->
@@ -638,8 +732,135 @@
     </main>
 
 
+    <!-- LEAFLET MAP JS -->
+
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    ></script>
+
+
+    <!-- YOUR APP JS -->
+
     <script src="./js/app.js"></script>
 
-</body>
 
-</html>
+<!-- ============================================================
+     AUTHORITY PORTAL - STEP 1
+============================================================ -->
+
+<section id="authorityPortal" class="authority-portal">
+
+    <div class="authority-header">
+        <div>
+            <span class="section-label">TRANSPORT AUTHORITY</span>
+            <h2>Urban Intelligence Dashboard</h2>
+            <p>Live fleet monitoring and city intelligence</p>
+        </div>
+
+        <div class="authority-status">
+            <span class="status-dot"></span>
+            SYSTEM ONLINE
+        </div>
+    </div>
+
+    <div class="authority-stats">
+
+        <div class="authority-stat-card">
+            <span>ACTIVE BUSES</span>
+            <strong id="authorityActiveBuses">0</strong>
+        </div>
+
+        <div class="authority-stat-card">
+            <span>LIVE INCIDENTS</span>
+            <strong id="authorityIncidents">0</strong>
+        </div>
+
+        <div class="authority-stat-card">
+            <span>AVG. FLEET CROWD</span>
+            <strong id="authorityCrowd">0%</strong>
+        </div>
+
+        <div class="authority-stat-card">
+            <span>BUSES MONITORED</span>
+            <strong id="authorityMonitored">0</strong>
+        </div>
+
+    </div>
+
+    <div class="authority-fleet">
+
+        <div class="authority-panel">
+
+            <div class="authority-panel-header">
+                <h3>🚌 Live Fleet</h3>
+                <span id="authorityLastUpdate">
+                    Updating...
+                </span>
+            </div>
+
+            <div id="authorityFleetList">
+                <div class="status-card">
+                    <p>Loading fleet information...</p>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="authority-panel">
+
+            <div class="authority-panel-header">
+                <h3>🚨 Intelligence Status</h3>
+            </div>
+
+            <div id="authorityIncidentList">
+
+                <div class="authority-empty-state">
+    <div>🤖</div>
+    <strong>AI monitoring active</strong>
+    <span>
+        AI is continuously monitoring the bus fleet for urban incidents.
+    </span>
+</div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+<!-- ============================================================
+     STEP 4 - AUTHORITY INCIDENT MANAGEMENT
+============================================================ -->
+
+<section class="authority-incidents-section">
+
+    <div class="authority-section-header">
+        <div>
+            <span class="section-label">AUTHORITY CONTROL</span>
+            <h2>Incident Management</h2>
+            <p>Review and manage AI-detected incidents.</p>
+        </div>
+    </div>
+
+    <div id="authorityIncidentList" class="authority-incident-list">
+
+        <div class="status-card">
+            <div class="status-icon">🛡️</div>
+
+            <h2>
+                No incidents to manage
+            </h2>
+
+            <p>
+                AI-detected incidents will appear here.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+
+</body>
+</html> 

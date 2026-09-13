@@ -1,531 +1,480 @@
 import sqlite3
-from datetime import datetime, timedelta
+import os
 
-DB_NAME = "smartbus.db"
+
+BASE_DIR = os.path.dirname(
+    os.path.dirname(
+        os.path.abspath(__file__)
+    )
+)
+
+DATABASE_DIR = os.path.join(
+    BASE_DIR,
+    "database"
+)
+
+DATABASE_PATH = os.path.join(
+    DATABASE_DIR,
+    "transport.db"
+)
 
 
 def get_connection():
-    connection = sqlite3.connect(DB_NAME)
+
+    os.makedirs(
+        DATABASE_DIR,
+        exist_ok=True
+    )
+
+    connection = sqlite3.connect(
+        DATABASE_PATH
+    )
+
     connection.row_factory = sqlite3.Row
+
     return connection
 
 
-def init_database():
+def initialize_database():
 
     connection = get_connection()
+
     cursor = connection.cursor()
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS buses (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            bus_number TEXT NOT NULL,
-            route_number TEXT NOT NULL,
-            route_name TEXT NOT NULL,
-            current_location TEXT,
-            next_stop TEXT,
-            eta INTEGER DEFAULT 0,
-            occupancy INTEGER DEFAULT 0,
-            status TEXT DEFAULT 'Active'
+            id TEXT PRIMARY KEY,
+            registration TEXT NOT NULL,
+            route_id TEXT NOT NULL,
+            capacity INTEGER NOT NULL,
+            passengers INTEGER NOT NULL,
+            latitude REAL NOT NULL,
+            longitude REAL NOT NULL,
+            speed REAL NOT NULL,
+            status TEXT NOT NULL
         )
     """)
 
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS travel_history (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            bus_number TEXT,
-            route_number TEXT,
-            from_location TEXT,
-            to_location TEXT,
-            fare REAL,
-            travel_date TEXT
+        CREATE TABLE IF NOT EXISTS routes (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            source TEXT NOT NULL,
+            destination TEXT NOT NULL,
+            stops TEXT NOT NULL
         )
     """)
 
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS expenses (
+        CREATE TABLE IF NOT EXISTS stops (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            latitude REAL NOT NULL,
+            longitude REAL NOT NULL
+        )
+    """)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS traffic (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            bus_number TEXT,
-            route_number TEXT,
-            fare REAL,
-            travel_date TEXT
+            location TEXT NOT NULL,
+            level TEXT NOT NULL,
+            delay_minutes INTEGER NOT NULL
+        )
+    """)
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS alerts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            type TEXT NOT NULL,
+            message TEXT NOT NULL,
+            bus_id TEXT,
+            severity TEXT NOT NULL
         )
     """)
 
     connection.commit()
-
-    add_sample_buses(connection)
-    add_sample_travel_data(connection)
 
     connection.close()
 
 
-# =====================================
-# SAMPLE BUS DATA
-# =====================================
+def reset_database():
 
-def add_sample_buses(connection):
+    connection = get_connection()
 
     cursor = connection.cursor()
 
-    count = cursor.execute(
-        "SELECT COUNT(*) FROM buses"
-    ).fetchone()[0]
+    cursor.execute("DROP TABLE IF EXISTS alerts")
+    cursor.execute("DROP TABLE IF EXISTS traffic")
+    cursor.execute("DROP TABLE IF EXISTS buses")
+    cursor.execute("DROP TABLE IF EXISTS routes")
+    cursor.execute("DROP TABLE IF EXISTS stops")
 
-    if count > 0:
-        return
+    connection.commit()
 
-    buses = [
+    connection.close()
 
+    initialize_database()
+
+
+def insert_bus(bus):
+
+    connection = get_connection()
+
+    connection.execute("""
+        INSERT OR REPLACE INTO buses
         (
-            "UP 53 NC 2456",
-            "NH24",
-            "Ghaziabad - Delhi",
-            "Ghaziabad",
-            "Anand Vihar",
-            8,
-            35,
-            "Active"
-        ),
-
-        (
-            "UP 53 AB 7821",
-            "NH24",
-            "Ghaziabad - Delhi",
-            "Vijay Nagar",
-            "Anand Vihar",
-            14,
-            62,
-            "Active"
-        ),
-
-        (
-            "UP 53 CD 4512",
-            "NH24",
-            "Ghaziabad - Delhi",
-            "Crossings Republik",
-            "Ghaziabad",
-            20,
-            48,
-            "Active"
-        ),
-
-        (
-            "UP 53 NC 9090",
-            "NH28",
-            "Lucknow - Gorakhpur",
-            "Ayodhya",
-            "Basti",
-            25,
-            72,
-            "Active"
-        ),
-
-        (
-            "UP 53 VIP 0001",
-            "NH28",
-            "Lucknow - Gorakhpur",
-            "Basti",
-            "Khalilabad",
-            12,
-            41,
-            "Active"
-        ),
-
-        (
-            "UP 53 XY 6634",
-            "NH28",
-            "Lucknow - Gorakhpur",
-            "Khalilabad",
-            "Gorakhpur",
-            18,
-            56,
-            "Active"
-        ),
-
-        (
-            "UP 53 MN 3188",
-            "NH91",
-            "Kanpur - Aligarh",
-            "Kanpur",
-            "Etawah",
-            17,
-            38,
-            "Active"
-        ),
-
-        (
-            "UP 53 ZZ 7777",
-            "NH91",
-            "Kanpur - Aligarh",
-            "Etawah",
-            "Mainpuri",
-            29,
-            81,
-            "Active"
-        )
-
-    ]
-
-    cursor.executemany("""
-        INSERT INTO buses (
-            bus_number,
-            route_number,
-            route_name,
-            current_location,
-            next_stop,
-            eta,
-            occupancy,
+            id,
+            registration,
+            route_id,
+            capacity,
+            passengers,
+            latitude,
+            longitude,
+            speed,
             status
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    """, buses)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        bus["id"],
+        bus["registration"],
+        bus["route_id"],
+        bus["capacity"],
+        bus["passengers"],
+        bus["latitude"],
+        bus["longitude"],
+        bus["speed"],
+        bus["status"]
+    ))
 
     connection.commit()
 
+    connection.close()
 
-# =====================================
-# SAMPLE TRAVEL + EXPENSE DATA
-# =====================================
 
-def add_sample_travel_data(connection):
+def insert_route(route):
 
-    cursor = connection.cursor()
+    connection = get_connection()
 
-    count = cursor.execute(
-        "SELECT COUNT(*) FROM travel_history"
-    ).fetchone()[0]
+    stops = ",".join(
+        route["stops"]
+    )
 
-    if count > 0:
-        return
-
-    today = datetime.now()
-
-    trips = [
-
+    connection.execute("""
+        INSERT OR REPLACE INTO routes
         (
-            "UP 53 NC 2456",
-            "NH24",
-            "Ghaziabad",
-            "Anand Vihar",
-            35,
-            (today - timedelta(days=1)).strftime("%Y-%m-%d")
-        ),
-
-        (
-            "UP 53 AB 7821",
-            "NH24",
-            "Vijay Nagar",
-            "Anand Vihar",
-            30,
-            (today - timedelta(days=2)).strftime("%Y-%m-%d")
-        ),
-
-        (
-            "UP 53 CD 4512",
-            "NH24",
-            "Crossings Republik",
-            "Ghaziabad",
-            25,
-            (today - timedelta(days=3)).strftime("%Y-%m-%d")
-        ),
-
-        (
-            "UP 53 VIP 0001",
-            "NH28",
-            "Basti",
-            "Khalilabad",
-            45,
-            (today - timedelta(days=5)).strftime("%Y-%m-%d")
-        ),
-
-        (
-            "UP 53 XY 6634",
-            "NH28",
-            "Khalilabad",
-            "Gorakhpur",
-            50,
-            (today - timedelta(days=7)).strftime("%Y-%m-%d")
-        ),
-
-        (
-            "UP 53 MN 3188",
-            "NH91",
-            "Kanpur",
-            "Etawah",
-            40,
-            (today - timedelta(days=10)).strftime("%Y-%m-%d")
-        ),
-
-        (
-            "UP 53 ZZ 7777",
-            "NH91",
-            "Etawah",
-            "Mainpuri",
-            45,
-            (today - timedelta(days=14)).strftime("%Y-%m-%d")
-        ),
-
-        (
-            "UP 53 NC 2456",
-            "NH24",
-            "Ghaziabad",
-            "Anand Vihar",
-            35,
-            (today - timedelta(days=20)).strftime("%Y-%m-%d")
+            id,
+            name,
+            source,
+            destination,
+            stops
         )
+        VALUES (?, ?, ?, ?, ?)
+    """, (
+        route["id"],
+        route["name"],
+        route["source"],
+        route["destination"],
+        stops
+    ))
 
-    ]
+    connection.commit()
 
-    cursor.executemany("""
-        INSERT INTO travel_history (
-            bus_number,
-            route_number,
-            from_location,
-            to_location,
-            fare,
-            travel_date
-        )
-        VALUES (?, ?, ?, ?, ?, ?)
-    """, trips)
+    connection.close()
 
 
-    cursor.executemany("""
-        INSERT INTO expenses (
-            bus_number,
-            route_number,
-            fare,
-            travel_date
+def insert_stop(stop):
+
+    connection = get_connection()
+
+    connection.execute("""
+        INSERT OR REPLACE INTO stops
+        (
+            id,
+            name,
+            latitude,
+            longitude
         )
         VALUES (?, ?, ?, ?)
-    """, [
-
-        (
-            trip[0],
-            trip[1],
-            trip[4],
-            trip[5]
-        )
-
-        for trip in trips
-
-    ])
+    """, (
+        stop["id"],
+        stop["name"],
+        stop["latitude"],
+        stop["longitude"]
+    ))
 
     connection.commit()
 
+    connection.close()
 
-# =====================================
-# GET ALL BUSES
-# =====================================
+
+def insert_traffic(item):
+
+    connection = get_connection()
+
+    connection.execute("""
+        INSERT INTO traffic
+        (
+            location,
+            level,
+            delay_minutes
+        )
+        VALUES (?, ?, ?)
+    """, (
+        item["location"],
+        item["level"],
+        item["delay_minutes"]
+    ))
+
+    connection.commit()
+
+    connection.close()
+
 
 def get_all_buses():
 
     connection = get_connection()
 
-    buses = connection.execute(
-        "SELECT * FROM buses ORDER BY id DESC"
+    rows = connection.execute(
+        "SELECT * FROM buses"
     ).fetchall()
 
     connection.close()
 
     return [
-        dict(bus)
-        for bus in buses
+        dict(row)
+        for row in rows
     ]
 
 
-# =====================================
-# TRAVEL HISTORY
-# =====================================
-
-def get_travel_history():
+def get_bus(bus_id):
 
     connection = get_connection()
 
-    history = connection.execute("""
-        SELECT
-            bus_number,
-            route_number,
-            from_location,
-            to_location,
-            fare,
-            travel_date
-        FROM travel_history
-        ORDER BY id DESC
-    """).fetchall()
+    row = connection.execute(
+        "SELECT * FROM buses WHERE id = ?",
+        (bus_id,)
+    ).fetchone()
+
+    connection.close()
+
+    if row:
+        return dict(row)
+
+    return None
+
+
+def get_all_routes():
+
+    connection = get_connection()
+
+    rows = connection.execute(
+        "SELECT * FROM routes"
+    ).fetchall()
+
+    connection.close()
+
+    routes = []
+
+    for row in rows:
+
+        route = dict(row)
+
+        route["stops"] = (
+            route["stops"].split(",")
+            if route["stops"]
+            else []
+        )
+
+        routes.append(route)
+
+    return routes
+
+
+def get_route(route_id):
+
+    connection = get_connection()
+
+    row = connection.execute(
+        "SELECT * FROM routes WHERE id = ?",
+        (route_id,)
+    ).fetchone()
+
+    connection.close()
+
+    if not row:
+        return None
+
+    route = dict(row)
+
+    route["stops"] = (
+        route["stops"].split(",")
+        if route["stops"]
+        else []
+    )
+
+    return route
+
+
+def get_all_stops():
+
+    connection = get_connection()
+
+    rows = connection.execute(
+        "SELECT * FROM stops"
+    ).fetchall()
 
     connection.close()
 
     return [
-        dict(item)
-        for item in history
+        dict(row)
+        for row in rows
     ]
 
 
-# =====================================
-# ADD BUS
-# =====================================
-
-def add_bus(
-    bus_number,
-    route_number,
-    route_name,
-    current_location,
-    next_stop,
-    eta,
-    occupancy,
-    status="Active"
-):
+def get_stop(stop_id):
 
     connection = get_connection()
 
-    connection.execute("""
-        INSERT INTO buses (
-            bus_number,
-            route_number,
-            route_name,
-            current_location,
-            next_stop,
-            eta,
-            occupancy,
-            status
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        bus_number,
-        route_number,
-        route_name,
-        current_location,
-        next_stop,
-        eta,
-        occupancy,
-        status
-    ))
+    row = connection.execute(
+        "SELECT * FROM stops WHERE id = ?",
+        (stop_id,)
+    ).fetchone()
 
-    connection.commit()
     connection.close()
 
+    if row:
+        return dict(row)
 
-# =====================================
-# ADD TRAVEL
-# =====================================
+    return None
 
-def add_travel(
-    bus_number,
-    route_number,
-    from_location,
-    to_location,
-    fare,
-    travel_date
+
+def get_traffic():
+
+    connection = get_connection()
+
+    rows = connection.execute(
+        "SELECT * FROM traffic"
+    ).fetchall()
+
+    connection.close()
+
+    return [
+        dict(row)
+        for row in rows
+    ]
+
+
+def get_alerts():
+
+    connection = get_connection()
+
+    rows = connection.execute(
+        "SELECT * FROM alerts ORDER BY id DESC"
+    ).fetchall()
+
+    connection.close()
+
+    return [
+        dict(row)
+        for row in rows
+    ]
+
+
+def create_alert(
+    alert_type,
+    message,
+    bus_id,
+    severity
 ):
 
     connection = get_connection()
 
     connection.execute("""
-        INSERT INTO travel_history (
-            bus_number,
-            route_number,
-            from_location,
-            to_location,
-            fare,
-            travel_date
-        )
-        VALUES (?, ?, ?, ?, ?, ?)
-    """, (
-        bus_number,
-        route_number,
-        from_location,
-        to_location,
-        fare,
-        travel_date
-    ))
-
-    connection.execute("""
-        INSERT INTO expenses (
-            bus_number,
-            route_number,
-            fare,
-            travel_date
+        INSERT INTO alerts
+        (
+            type,
+            message,
+            bus_id,
+            severity
         )
         VALUES (?, ?, ?, ?)
     """, (
-        bus_number,
-        route_number,
-        fare,
-        travel_date
+        alert_type,
+        message,
+        bus_id,
+        severity
     ))
 
     connection.commit()
+
     connection.close()
 
 
-# =====================================
-# EXPENSE SUMMARY
-# =====================================
-
-def get_expense_summary():
+def update_bus_location(
+    bus_id,
+    latitude,
+    longitude,
+    speed
+):
 
     connection = get_connection()
 
-    weekly = connection.execute("""
-        SELECT
-            COALESCE(SUM(fare), 0) AS expense,
-            COUNT(*) AS trips
-        FROM expenses
-        WHERE date(travel_date)
-        >= date('now', '-7 days')
-    """).fetchone()
+    connection.execute("""
+        UPDATE buses
+        SET latitude = ?,
+            longitude = ?,
+            speed = ?
+        WHERE id = ?
+    """, (
+        latitude,
+        longitude,
+        speed,
+        bus_id
+    ))
 
-
-    monthly = connection.execute("""
-        SELECT
-            COALESCE(SUM(fare), 0) AS expense,
-            COUNT(*) AS trips
-        FROM expenses
-        WHERE date(travel_date)
-        >= date('now', 'start of month')
-    """).fetchone()
-
-
-    average = connection.execute("""
-        SELECT
-            COALESCE(AVG(fare), 0) AS average
-        FROM expenses
-    """).fetchone()
-
+    connection.commit()
 
     connection.close()
 
 
-    return {
+def update_bus_status(
+    bus_id,
+    status
+):
 
-        "weekly": {
-            "expense": weekly["expense"],
-            "trips": weekly["trips"]
-        },
+    connection = get_connection()
 
-        "monthly": {
-            "expense": monthly["expense"],
-            "trips": monthly["trips"]
-        },
+    connection.execute("""
+        UPDATE buses
+        SET status = ?
+        WHERE id = ?
+    """, (
+        status,
+        bus_id
+    ))
 
-        "average_per_trip":
-            average["average"]
+    connection.commit()
 
-    }
+    connection.close()
 
 
-# =====================================
-# INITIALIZE
-# =====================================
+def update_passengers(
+    bus_id,
+    passengers
+):
 
-if __name__ == "__main__":
+    connection = get_connection()
 
-    init_database()
+    connection.execute("""
+        UPDATE buses
+        SET passengers = ?
+        WHERE id = ?
+    """, (
+        passengers,
+        bus_id
+    ))
 
-    print(
-        "Smart Bus database initialized successfully."
-    )
+    connection.commit()
 
-    print(
-        "Sample buses and travel data added."
-    )
+    connection.close()

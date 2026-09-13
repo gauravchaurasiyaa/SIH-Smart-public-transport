@@ -1,137 +1,55 @@
-from database import get_connection
+from database import (
+    reset_database,
+    insert_bus,
+    insert_route,
+    insert_stop,
+    insert_traffic
+)
+
+from transport_data import (
+    BUSES,
+    ROUTES,
+    STOPS,
+    TRAFFIC
+)
 
 
-def add_routes():
+def seed_database():
 
-    connection = get_connection()
-    cursor = connection.cursor()
+    print("Resetting database...")
 
-    routes = [
-        (
-            "R102",
-            "College - Railway Station",
-            "College",
-            "Railway Station",
-            8.5
-        ),
-        (
-            "R205",
-            "University - City Center",
-            "University",
-            "City Center",
-            6.2
-        ),
-        (
-            "R310",
-            "Airport - Railway Station",
-            "Airport Road",
-            "Railway Station",
-            12.4
-        )
-    ]
+    reset_database()
 
-    cursor.executemany("""
-        INSERT OR IGNORE INTO routes (
-            route_number,
-            route_name,
-            start_point,
-            end_point,
-            total_distance
-        )
-        VALUES (?, ?, ?, ?, ?)
-    """, routes)
+    print("Adding routes...")
 
-    connection.commit()
+    for route in ROUTES:
+        insert_route(route)
 
-    connection.close()
+    print("Adding stops...")
 
-    print("Routes added successfully.")
+    for stop in STOPS:
+        insert_stop(stop)
 
+    print("Adding buses...")
 
-def add_buses():
+    for bus in BUSES:
+        insert_bus(bus)
 
-    connection = get_connection()
-    cursor = connection.cursor()
+    print("Adding traffic data...")
 
+    for traffic in TRAFFIC:
+        insert_traffic(traffic)
 
-    cursor.execute("""
-        SELECT id, route_number, route_name
-        FROM routes
-    """)
-
-    routes = cursor.fetchall()
-
-
-    route_ids = {}
-
-    for route in routes:
-
-        route_ids[route["route_number"]] = {
-            "id": route["id"],
-            "name": route["route_name"]
-        }
-
-
-    buses = [
-        (
-            "102",
-            route_ids["R102"]["id"],
-            route_ids["R102"]["name"],
-            "College",
-            "Main Market",
-            8,
-            76,
-            "Running"
-        ),
-        (
-            "205",
-            route_ids["R205"]["id"],
-            route_ids["R205"]["name"],
-            "University",
-            "Central Mall",
-            12,
-            52,
-            "Running"
-        ),
-        (
-            "310",
-            route_ids["R310"]["id"],
-            route_ids["R310"]["name"],
-            "Airport Road",
-            "Bus Terminal",
-            18,
-            34,
-            "Running"
-        )
-    ]
-
-
-    cursor.executemany("""
-        INSERT INTO buses (
-            bus_number,
-            route_id,
-            route_name,
-            current_location,
-            next_stop,
-            eta,
-            occupancy,
-            status
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    """, buses)
-
-
-    connection.commit()
-
-    connection.close()
-
-    print("Buses added successfully.")
+    print("")
+    print("================================")
+    print("SMART BUS DATABASE READY")
+    print("================================")
+    print(f"Routes: {len(ROUTES)}")
+    print(f"Stops: {len(STOPS)}")
+    print(f"Buses: {len(BUSES)}")
+    print(f"Traffic zones: {len(TRAFFIC)}")
+    print("================================")
 
 
 if __name__ == "__main__":
-
-    add_routes()
-
-    add_buses()
-
-    print("Transport data added successfully.")
+    seed_database()

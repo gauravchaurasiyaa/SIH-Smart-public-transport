@@ -1,281 +1,229 @@
-from database import get_connection
-
-
-def add_routes():
-
-    connection = get_connection()
-    cursor = connection.cursor()
-
-    routes = [
-        (
-            "R102",
-            "College - Railway Station",
-            "College",
-            "Railway Station",
-            8.5
-        ),
-        (
-            "R205",
-            "University - City Center",
-            "University",
-            "City Center",
-            6.2
-        ),
-        (
-            "R310",
-            "Airport - Railway Station",
-            "Airport Road",
-            "Railway Station",
-            12.4
-        )
-    ]
-
-    cursor.executemany("""
-        INSERT OR IGNORE INTO routes (
-            route_number,
-            route_name,
-            start_point,
-            end_point,
-            total_distance
-        )
-        VALUES (?, ?, ?, ?, ?)
-    """, routes)
-
-    connection.commit()
-    connection.close()
-
-    print("Routes added successfully.")
-
-
-def add_bus_stops():
-
-    connection = get_connection()
-    cursor = connection.cursor()
-
-    stops = [
-        ("College", "College", 26.8467, 80.9462),
-        ("Main Market", "Main Market", 26.8480, 80.9500),
-        ("Central Mall", "Central Mall", 26.8505, 80.9550),
-        ("Railway Station", "Railway Station", 26.8320, 80.9180),
-        ("University", "University", 26.8465, 80.9390),
-        ("City Center", "City Center", 26.8550, 80.9490),
-        ("Airport Road", "Airport Road", 26.7606, 80.8893),
-        ("Bus Terminal", "Bus Terminal", 26.8380, 80.9340)
-    ]
-
-    cursor.executemany("""
-        INSERT INTO bus_stops (
-            stop_name,
-            location,
-            latitude,
-            longitude
-        )
-        VALUES (?, ?, ?, ?)
-    """, stops)
-
-    connection.commit()
-    connection.close()
-
-    print("Bus stops added successfully.")
-
-
-def connect_route_stops():
-
-    connection = get_connection()
-    cursor = connection.cursor()
-
-
-    cursor.execute("""
-        SELECT id, route_number
-        FROM routes
-    """)
-
-    routes = cursor.fetchall()
-
-
-    cursor.execute("""
-        SELECT id, stop_name
-        FROM bus_stops
-    """)
-
-    stops = cursor.fetchall()
-
-
-    route_ids = {}
-
-    for route in routes:
-        route_ids[route["route_number"]] = route["id"]
-
-
-    stop_ids = {}
-
-    for stop in stops:
-        stop_ids[stop["stop_name"]] = stop["id"]
-
-
-    route_stop_data = [
-
-        (
-            route_ids["R102"],
-            stop_ids["College"],
-            1
-        ),
-
-        (
-            route_ids["R102"],
-            stop_ids["Main Market"],
-            2
-        ),
-
-        (
-            route_ids["R102"],
-            stop_ids["Central Mall"],
-            3
-        ),
-
-        (
-            route_ids["R102"],
-            stop_ids["Railway Station"],
-            4
-        ),
-
-        (
-            route_ids["R205"],
-            stop_ids["University"],
-            1
-        ),
-
-        (
-            route_ids["R205"],
-            stop_ids["City Center"],
-            2
-        ),
-
-        (
-            route_ids["R310"],
-            stop_ids["Airport Road"],
-            1
-        ),
-
-        (
-            route_ids["R310"],
-            stop_ids["Bus Terminal"],
-            2
-        ),
-
-        (
-            route_ids["R310"],
-            stop_ids["Railway Station"],
-            3
-        )
-    ]
-
-
-    cursor.executemany("""
-        INSERT INTO route_stops (
-            route_id,
-            stop_id,
-            stop_order
-        )
-        VALUES (?, ?, ?)
-    """, route_stop_data)
-
-
-    connection.commit()
-    connection.close()
-
-    print("Route stops connected successfully.")
-
-
-def add_buses():
-
-    connection = get_connection()
-    cursor = connection.cursor()
-
-
-    cursor.execute("""
-        SELECT id, route_number, route_name
-        FROM routes
-    """)
-
-    routes = cursor.fetchall()
-
-
-    route_ids = {}
-
-    for route in routes:
-
-        route_ids[route["route_number"]] = {
-            "id": route["id"],
-            "name": route["route_name"]
-        }
-
-
-    buses = [
-        (
-            "102",
-            route_ids["R102"]["id"],
-            route_ids["R102"]["name"],
-            "College",
-            "Main Market",
-            8,
-            76,
-            "Running"
-        ),
-
-        (
-            "205",
-            route_ids["R205"]["id"],
-            route_ids["R205"]["name"],
-            "University",
-            "City Center",
-            12,
-            52,
-            "Running"
-        ),
-
-        (
-            "310",
-            route_ids["R310"]["id"],
-            route_ids["R310"]["name"],
-            "Airport Road",
-            "Bus Terminal",
-            18,
-            34,
-            "Running"
-        )
-    ]
-
-
-    cursor.executemany("""
-        INSERT INTO buses (
-            bus_number,
-            route_id,
-            route_name,
-            current_location,
-            next_stop,
-            eta,
-            occupancy,
-            status
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    """, buses)
-
-
-    connection.commit()
-    connection.close()
-
-    print("Buses added successfully.")
-
-
-if __name__ == "__main__":
-
-    add_routes()
-
-    add_bus_stops()
-
-    connect_route_stops()
-
-    add_buses()
-
-    print("Complete transport data added successfully.")
+ROUTES = [
+    {
+        "id": "NH24",
+        "name": "NH24",
+        "source": "Ghaziabad",
+        "destination": "Delhi",
+        "stops": [
+            "Ghaziabad",
+            "Vijay Nagar",
+            "Anand Vihar",
+            "Kaushambi",
+            "Delhi"
+        ]
+    },
+    {
+        "id": "NH28",
+        "name": "NH28",
+        "source": "Lucknow",
+        "destination": "Gorakhpur",
+        "stops": [
+            "Lucknow",
+            "Ayodhya",
+            "Basti",
+            "Gorakhpur"
+        ]
+    },
+    {
+        "id": "NH30",
+        "name": "NH30",
+        "source": "Lucknow",
+        "destination": "Kanpur",
+        "stops": [
+            "Lucknow",
+            "Unnao",
+            "Kanpur"
+        ]
+    },
+    {
+        "id": "NH27",
+        "name": "NH27",
+        "source": "Gorakhpur",
+        "destination": "Ayodhya",
+        "stops": [
+            "Gorakhpur",
+            "Basti",
+            "Ayodhya"
+        ]
+    }
+]
+
+
+STOPS = [
+    {
+        "id": "ST01",
+        "name": "Ghaziabad",
+        "latitude": 28.6692,
+        "longitude": 77.4538
+    },
+    {
+        "id": "ST02",
+        "name": "Vijay Nagar",
+        "latitude": 28.6692,
+        "longitude": 77.4350
+    },
+    {
+        "id": "ST03",
+        "name": "Anand Vihar",
+        "latitude": 28.6469,
+        "longitude": 77.3160
+    },
+    {
+        "id": "ST04",
+        "name": "Kaushambi",
+        "latitude": 28.6455,
+        "longitude": 77.3240
+    },
+    {
+        "id": "ST05",
+        "name": "Delhi",
+        "latitude": 28.6139,
+        "longitude": 77.2090
+    },
+    {
+        "id": "ST06",
+        "name": "Lucknow",
+        "latitude": 26.8467,
+        "longitude": 80.9462
+    },
+    {
+        "id": "ST07",
+        "name": "Ayodhya",
+        "latitude": 26.7997,
+        "longitude": 82.2043
+    },
+    {
+        "id": "ST08",
+        "name": "Basti",
+        "latitude": 26.8014,
+        "longitude": 82.7274
+    },
+    {
+        "id": "ST09",
+        "name": "Gorakhpur",
+        "latitude": 26.7606,
+        "longitude": 83.3732
+    },
+    {
+        "id": "ST10",
+        "name": "Unnao",
+        "latitude": 26.5471,
+        "longitude": 80.4878
+    },
+    {
+        "id": "ST11",
+        "name": "Kanpur",
+        "latitude": 26.4499,
+        "longitude": 80.3319
+    }
+]
+
+
+BUSES = [
+    {
+        "id": "BUS001",
+        "registration": "UP53NC1024",
+        "route_id": "NH24",
+        "capacity": 50,
+        "passengers": 32,
+        "latitude": 28.6600,
+        "longitude": 77.4200,
+        "speed": 42,
+        "status": "on-time"
+    },
+    {
+        "id": "BUS002",
+        "registration": "UP53NC2048",
+        "route_id": "NH24",
+        "capacity": 50,
+        "passengers": 44,
+        "latitude": 28.6500,
+        "longitude": 77.3500,
+        "speed": 31,
+        "status": "delayed"
+    },
+    {
+        "id": "BUS003",
+        "registration": "UP53NC3096",
+        "route_id": "NH28",
+        "capacity": 52,
+        "passengers": 24,
+        "latitude": 26.9000,
+        "longitude": 81.2000,
+        "speed": 55,
+        "status": "on-time"
+    },
+    {
+        "id": "BUS004",
+        "registration": "UP53NC4012",
+        "route_id": "NH28",
+        "capacity": 52,
+        "passengers": 47,
+        "latitude": 26.8200,
+        "longitude": 82.0000,
+        "speed": 38,
+        "status": "crowded"
+    },
+    {
+        "id": "BUS005",
+        "registration": "UP53NC5099",
+        "route_id": "NH30",
+        "capacity": 45,
+        "passengers": 19,
+        "latitude": 26.7000,
+        "longitude": 80.7500,
+        "speed": 48,
+        "status": "on-time"
+    },
+    {
+        "id": "BUS006",
+        "registration": "UP53NC6018",
+        "route_id": "NH27",
+        "capacity": 50,
+        "passengers": 41,
+        "latitude": 26.7900,
+        "longitude": 82.4500,
+        "speed": 35,
+        "status": "delayed"
+    }
+]
+
+
+TRAFFIC = [
+    {
+        "id": 1,
+        "location": "Ghaziabad",
+        "level": "high",
+        "delay_minutes": 8
+    },
+    {
+        "id": 2,
+        "location": "Anand Vihar",
+        "level": "medium",
+        "delay_minutes": 4
+    },
+    {
+        "id": 3,
+        "location": "Ayodhya",
+        "level": "low",
+        "delay_minutes": 1
+    },
+    {
+        "id": 4,
+        "location": "Basti",
+        "level": "medium",
+        "delay_minutes": 5
+    },
+    {
+        "id": 5,
+        "location": "Lucknow",
+        "level": "high",
+        "delay_minutes": 9
+    },
+    {
+        "id": 6,
+        "location": "Kanpur",
+        "level": "medium",
+        "delay_minutes": 4
+    }
+]
